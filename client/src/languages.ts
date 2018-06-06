@@ -6,8 +6,7 @@ interface BlockKind {
 
 interface Editor<TState> {
   initialize(block:BlockKind) : TState;
-  render(id:number, state:TState) : void;
-  append(id:number) : void;
+  render(id:number, block:BlockKind) : void;
 }
 
 interface LanguagePlugin {

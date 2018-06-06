@@ -48,23 +48,31 @@ class MarkdownBlockKind implements Langs.BlockKind {
 // an interface - and TypeScript lets us do this using a simple 
 // JavaScript record expression - to this is much simpler than a class.
 
-/*
-const markdownEditor : Langs.Editor = {
-  create: (id:number, blockcode:Langs.BlockKind) => {
+
+const markdownEditor : Langs.Editor<SillyState> = {
+  initialize: (blockcode:Langs.BlockKind) => {  
+    return { Editing: false };
+  },
+  render: (id:number, blockcode:Langs.BlockKind) => {
+    let renderEditorDiv = function() {
+      return h('div', {id: "block_" + id.toString(),
+                        class:"block"}, [
+        h('div', { id: "editor_" + id.toString(),
+        class:"editor" }, []),
+      ] );
+    }
     // cast code into BlockKind
     let markdownBlock = <MarkdownBlockKind>blockcode;
     let editing = true;
     let outputId = "output_"+id;
-    let blockId = "block_"+index;
-    let editorId = "editor_"+index;
-
-    // create div for this block
-    $('#paper').append("<div id=\""+blockId+"\" class=\"block\" ></div>")
-    
-    // append editor onto block div
-    let blockEl = $('#'+blockId);
-    blockEl.append("<div id=\""+editorId+"\" class=\"editor\" ></div>")
-
+    let blockId = "block_"+id;
+    let editorId = "editor_"+id;
+  
+    let paperElement = document.getElementById('paper');
+      
+    createProjector().append(paperElement,renderEditorDiv);
+    createProjector().renderNow();
+      
     // create editor element
     let editorEl = $('#'+editorId);
     editorEl[0].classList.add('editable');
@@ -77,29 +85,13 @@ const markdownEditor : Langs.Editor = {
       theme:'vs',
     });
 
-    // old code for initialising textarea
-    // let initInput = function(evt) {
-    //   markdownBlock.source = evt.target.value;
-    // }
-
     let toggleVisible = function () {
       editing = !editing;
       if (editing===true)
         editorEl[0].classList.add("editable");
-      // console.log(editing);
     }
 
     let renderOutput = function() {
-      // return h('div', {id:outputId}, 
-      // [ 
-      //   h('textarea', { 
-      //     placeholder: 'Place markdown code here;', rows: 5, cols:50,
-      //     value: (editor.getValue() || ''), oninput: initInput,  
-      //   }),
-      //   h('p.output', [
-      //     'Output: ' + (editor.getValue() || '')
-      //   ])
-      // ]);
       let mdText = editor.getValue() ? marked(editor.getValue()) : '';
       return h('div.output', {
         id:outputId, 
@@ -110,8 +102,9 @@ const markdownEditor : Langs.Editor = {
     }
 
     // append output onto block div
+    let blockEl = $('#'+blockId);
     createProjector().append(blockEl[0], renderOutput);
-    var myCondition1 = editor.createContextKey(/*key name*'myCondition1', /*default value*true);
+    var myCondition1 = editor.createContextKey('myCondition1', true);
     
     // callback to update output when triggered
     let myBinding = editor.addCommand(monaco.KeyCode.Enter | monaco.KeyMod.Shift,function (e) {
@@ -137,63 +130,63 @@ const markdownLanguagePlugin : Langs.LanguagePlugin = {
     return new MarkdownBlockKind(code);
   }
 }
-*/
+
 type SillyState = {
   Editing : boolean;
 }
 
-const sillyEditor : Langs.Editor<SillyState> = {
-  initialize: (blockcode:Langs.BlockKind) => {  
-    return { Editing: false };
-  },
-  append: (id:number) => {
-    let editorId = "editor_"+id;
-    let editorEl = $('#'+editorId);
-    // let editorEl = $('#paper');
-    console.log(editorEl);
-    console.log(editorId);
-  },
-  render: (id:number, state:SillyState) => {
-    function switchEditing() {
-      state.Editing = !state.Editing;
-      console.log("Switched to " + id + " " + state.Editing)
-    }
-    let renderEditorDiv = function() {
-      return h('div', {id: "block_" + id.toString()}, [
-        h('div', { id: "editor_" + id.toString() }, [ "EDITOR: Hello world!" ]),
-        h('button', { onclick: switchEditing }, ["Update"])
-      ] );
-    }
-    // if (state.Editing) {
-      let paperElement = document.getElementById('paper');
-      console.log(paperElement)
-      createProjector().append(paperElement,renderEditorDiv);
-      createProjector().renderNow();
-      let editorId = "editor_"+id;
-      let editorEl = $('#'+editorId);
-      let editor = monaco.editor.create(editorEl[0], {
-        value: "value",
-        language: 'markdown',
-        scrollBeyondLastLine: false,
-        theme:'vs',
-      });
-    // }
-    // else
-    //   return h('div', [
-    //     h('p', [ "Hello world!" ]),
-    //     h('button', { onclick: switchEditing }, ["Edit"])
-    //   ] );
-  },
+// const sillyEditor : Langs.Editor<SillyState> = {
+//   initialize: (blockcode:Langs.BlockKind) => {  
+//     return { Editing: false };
+//   },
+//   append: (id:number) => {
+//     let editorId = "editor_"+id;
+//     let editorEl = $('#'+editorId);
+//     // let editorEl = $('#paper');
+//     console.log(editorEl);
+//     console.log(editorId);
+//   },
+//   render: (id:number, state:SillyState) => {
+//     function switchEditing() {
+//       state.Editing = !state.Editing;
+//       console.log("Switched to " + id + " " + state.Editing)
+//     }
+//     let renderEditorDiv = function() {
+//       return h('div', {id: "block_" + id.toString()}, [
+//         h('div', { id: "editor_" + id.toString() }, [ "EDITOR: Hello world!" ]),
+//         h('button', { onclick: switchEditing }, ["Update"])
+//       ] );
+//     }
+//     // if (state.Editing) {
+//       let paperElement = document.getElementById('paper');
+//       console.log(paperElement)
+//       createProjector().append(paperElement,renderEditorDiv);
+//       createProjector().renderNow();
+//       let editorId = "editor_"+id;
+//       let editorEl = $('#'+editorId);
+//       let editor = monaco.editor.create(editorEl[0], {
+//         value: "value",
+//         language: 'markdown',
+//         scrollBeyondLastLine: false,
+//         theme:'vs',
+//       });
+//     // }
+//     // else
+//     //   return h('div', [
+//     //     h('p', [ "Hello world!" ]),
+//     //     h('button', { onclick: switchEditing }, ["Edit"])
+//     //   ] );
+//   },
   
-}
+// }
 
-const markdownLanguagePlugin : Langs.LanguagePlugin = {
-  language: "markdown",
-  editor: sillyEditor,
-  parse: (code:string) => {
-    return new MarkdownBlockKind(code);
-  }
-}
+// const markdownLanguagePlugin : Langs.LanguagePlugin = {
+//   language: "markdown",
+//   editor: sillyEditor,
+//   parse: (code:string) => {
+//     return new MarkdownBlockKind(code);
+//   }
+// }
 
 // Wrattler will have a number of language plugins for different
 // languages (including R, Python, TheGamma and Markdown). Probably
@@ -247,8 +240,8 @@ function render(state:NotebookState) {
   let nodes = state.Cells.map(cellState => {
     let plugin = languagePlugins[cellState.Block.language]
     console.log(cellState)
-    let vnode = plugin.editor.render(index, cellState.State)
-    plugin.editor.append(index)
+    let vnode = plugin.editor.render(index, cellState.Block)
+    // plugin.editor.append(index)
     index++;
     // plugin.editor.append(index);
     // return h('div', [
