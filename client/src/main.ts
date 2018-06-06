@@ -12,9 +12,9 @@ import marked from 'marked';
 // import * as styles from "./editor.css";
 
 
-fsHello();
-jsHello();
-tsHello();
+// fsHello();
+// jsHello();
+// tsHello();
 
 // var el = $('#paper')[0];
 const s = require('./editor.css');
@@ -146,22 +146,45 @@ const sillyEditor : Langs.Editor<SillyState> = {
   initialize: (blockcode:Langs.BlockKind) => {  
     return { Editing: false };
   },
+  append: (id:number) => {
+    let editorId = "editor_"+id;
+    let editorEl = $('#'+editorId);
+    // let editorEl = $('#paper');
+    console.log(editorEl);
+    console.log(editorId);
+  },
   render: (id:number, state:SillyState) => {
     function switchEditing() {
       state.Editing = !state.Editing;
       console.log("Switched to " + id + " " + state.Editing)
     }
-    if (state.Editing) 
-      return h('div', [
+    let renderEditorDiv = function() {
+      return h('div', {id: "block_" + id.toString()}, [
         h('div', { id: "editor_" + id.toString() }, [ "EDITOR: Hello world!" ]),
         h('button', { onclick: switchEditing }, ["Update"])
       ] );
-    else
-      return h('div', [
-        h('p', [ "Hello world!" ]),
-        h('button', { onclick: switchEditing }, ["Edit"])
-      ] );
-  }
+    }
+    // if (state.Editing) {
+      let paperElement = document.getElementById('paper');
+      console.log(paperElement)
+      createProjector().append(paperElement,renderEditorDiv);
+      createProjector().renderNow();
+      let editorId = "editor_"+id;
+      let editorEl = $('#'+editorId);
+      let editor = monaco.editor.create(editorEl[0], {
+        value: "value",
+        language: 'markdown',
+        scrollBeyondLastLine: false,
+        theme:'vs',
+      });
+    // }
+    // else
+    //   return h('div', [
+    //     h('p', [ "Hello world!" ]),
+    //     h('button', { onclick: switchEditing }, ["Edit"])
+    //   ] );
+  },
+  
 }
 
 const markdownLanguagePlugin : Langs.LanguagePlugin = {
@@ -223,13 +246,17 @@ function render(state:NotebookState) {
   let index = 0
   let nodes = state.Cells.map(cellState => {
     let plugin = languagePlugins[cellState.Block.language]
-    let vnode = plugin.editor.render(index++, cellState.State)
-    return h('div', [
-      h('h2', ["Blockkkk " + index.toString()]),
-      vnode
-    ]);
+    console.log(cellState)
+    let vnode = plugin.editor.render(index, cellState.State)
+    plugin.editor.append(index)
+    index++;
+    // plugin.editor.append(index);
+    // return h('div', [
+    //   h('h2', ["Blockkkk " + index.toString()]),
+    //   vnode
+    // ]);
   })  
-  return h('div', nodes);
+  // return h('div', nodes);
 }
 
 function renderOutput() {
@@ -237,8 +264,9 @@ function renderOutput() {
 }
 
 let paperElement = document.getElementById('paper');
-let proj = createProjector();
-proj.replace(paperElement, renderOutput);
+// let proj = createProjector();
+// proj.replace(paperElement, renderOutput);
+renderOutput();
 
 
 /*
